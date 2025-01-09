@@ -7,18 +7,34 @@ public class PoliceCar : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Transform player;
-    // Start is called before the first frame update
-    void Start()
+    private bool isPursuing = false; // Indica si el coche de policía está persiguiendo
+
+    private void Start()
     {
-        //Asignamos las variables
         agent = GetComponent<NavMeshAgent>();
-        player = FindAnyObjectByType<CarController>().transform;
+        player = FindObjectOfType<CarController>().transform;
+
+        // Suscribirse al evento de exceso de velocidad
+        CarController.OnExceedSpeedLimit += StartPursuit;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        agent.destination = player.position; //cada frame buscamos la posición del jugador
+        if (isPursuing)
+        {
+            agent.destination = player.position; // Persigue al jugador solo si está activo
+        }
+    }
 
+    private void StartPursuit()
+    {
+        isPursuing = true; // Activa la persecución
+        Debug.Log("¡El coche ha excedido el límite de velocidad! Iniciando persecución.");
+    }
+
+    private void OnDestroy()
+    {
+        // Desuscribirse del evento para evitar errores
+        CarController.OnExceedSpeedLimit -= StartPursuit;
     }
 }

@@ -12,19 +12,22 @@ public class CarController : MonoBehaviour
     [SerializeField] private float enginePower, brakingPower, maxTurnAngle;
     [SerializeField] private float topSpeed = 75f;
 
+    // Evento que notifica cuando el coche excede la velocidad límite
+    public static event Action OnExceedSpeedLimit;
+
     // Ruedas (Colliders)
     [SerializeField] private WheelCollider frontLeftCollider, frontRightCollider;
     [SerializeField] private WheelCollider rearLeftCollider, rearRightCollider;
+    [SerializeField] private Transform frontLeftMesh;
+    [SerializeField] private Transform frontRightMesh;
+    [SerializeField] private Transform rearLeftMesh;
+    [SerializeField] private Transform rearRightMesh;
 
-    // Ruedas (Transformaciones)
-    [SerializeField] private Transform frontLeftMesh, frontRightMesh;
-    [SerializeField] private Transform rearLeftMesh, rearRightMesh;
 
     // Centro de masa
     [SerializeField] private Vector3 massCenterOffset;
     private Rigidbody rb;
 
-    // Inicialización
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -37,6 +40,8 @@ public class CarController : MonoBehaviour
         ControlAcceleration();
         ControlSteering();
         UpdateWheelMeshes();
+
+        CheckSpeedLimit();
     }
 
     // Procesar Entrada del Jugador
@@ -82,6 +87,16 @@ public class CarController : MonoBehaviour
         frontRightCollider.steerAngle = steerAngle;
     }
 
+    // Comprobar si se excede el límite de velocidad
+    private void CheckSpeedLimit()
+    {
+        float speedKmh = rb.velocity.magnitude * 3.6f; // Convierte m/s a km/h
+        if (speedKmh > 40f)
+        {
+            OnExceedSpeedLimit?.Invoke(); // Dispara el evento
+        }
+    }
+
     // Actualizar las Mallas de las Ruedas
     private void UpdateWheelMeshes()
     {
@@ -91,7 +106,6 @@ public class CarController : MonoBehaviour
         UpdateWheelPose(rearLeftCollider, rearLeftMesh);
     }
 
-    // 🟡 Actualizar una Rueda Individual
     private void UpdateWheelPose(WheelCollider wheelCol, Transform wheelMesh)
     {
         Vector3 pos;

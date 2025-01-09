@@ -4,74 +4,46 @@ using UnityEngine;
 
 public class PassengerFactory : MonoBehaviour
 {
-    [SerializeField] private List<GameObject> passengerPrefabs; // Lista de prefabs de pasajeros
-    [SerializeField] private int poolSize = 5; // Número máximo de pasajeros
-    [SerializeField] private float spawnTimer = 2f; // Intervalo de tiempo para generar pasajeros
+    // Singleton: Instancia estática de PassengerFactory
+    public static PassengerFactory Instance { get; private set; }
 
-    private GameObject[] pool; // Pool de pasajeros
+    [SerializeField] private List<GameObject> passengerPrefabs; // Lista de prefabs de pasajeros
 
     private void Awake()
     {
-        PopulatePool(); // Crear el pool al iniciar el juego
-    }
-
-    private void Start()
-    {
-        StartCoroutine(SpawnPassengers()); // Comenzar a generar pasajeros
-    }
-
-    private void PopulatePool()
-    {
-        // Inicializa el pool con pasajeros desactivados
-        pool = new GameObject[poolSize];
-
-        for (int i = 0; i < pool.Length; i++)
+        // Verificar si ya existe una instancia del Singleton
+        if (Instance != null && Instance != this)
         {
-            int randomIndex = Random.Range(0, passengerPrefabs.Count);
-            pool[i] = Instantiate(passengerPrefabs[randomIndex], transform);
-            pool[i].SetActive(false); // Desactiva el pasajero inicialmente
+            Destroy(gameObject);
+            return;
         }
+
+        // Asignar la instancia única
+        Instance = this;
     }
 
-    private void EnableObjectInPool()
+    public GameObject CreatePassenger()
     {
-        foreach (GameObject passenger in pool)
-        {
-            if (!passenger.activeInHierarchy)
-            {
-                // Genera una posición aleatoria para el pasajero
-                Vector3 spawnPosition = GetRandomPosition();
-                passenger.transform.position = spawnPosition;
+        int randomIndex = Random.Range(0, passengerPrefabs.Count);
+        GameObject passenger = Instantiate(passengerPrefabs[randomIndex], transform);
 
-                // Asigna un destino aleatorio
-                Vector3 destination = GetRandomPosition();
-                Passenger passengerScript = passenger.GetComponent<Passenger>();
-                passengerScript.SetDestination(destination);
+        // Generar posición inicial y destino
+        Vector3 spawnPosition = GetRandomPosition();
+        Vector3 destination = GetRandomPosition();
 
-                // Activa el pasajero
-                passenger.SetActive(true);
+        passenger.transform.position = spawnPosition;
+        Passenger passengerScript = passenger.GetComponent<Passenger>();
+        passengerScript.SetDestination(destination);
 
-                // Muestra información en la consola
-                Debug.Log($"Pasajero creado en posición: {spawnPosition}, con destino: {destination}");
-                return;
-            }
-        }
+        Debug.Log($"Pasajero creado en posición: {spawnPosition}, con destino: {destination}");
+
+        return passenger;
     }
 
     private Vector3 GetRandomPosition()
     {
-        // Genera una posición aleatoria dentro del mapa
         float randomX = Random.Range(-50f, 50f); // Ajusta estos valores según tu mapa
         float randomZ = Random.Range(-50f, 50f);
-        return new Vector3(randomX, 0, randomZ); // Y = 0 para estar sobre el suelo
-    }
-
-    private IEnumerator SpawnPassengers()
-    {
-        while (true)
-        {
-            EnableObjectInPool(); // Activa un pasajero del pool
-            yield return new WaitForSeconds(spawnTimer); // Espera antes de generar otro pasajero
-        }
+        return new Vector3(randomX, 0, randomZ); // Altura Y = 0
     }
 }
