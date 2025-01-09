@@ -1,123 +1,103 @@
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
-    private Rigidbody playerRB;
-    public WheelColliders colliders;
-    public WheelMeshes wheelMeshes;
-    public float gasInput;
-    public float brakeInput;
-    public float steeringInput;
-    public float motorPower;
-    public float brakePower;
-    public float slipAngle;
-    private float speed;
-    public AnimationCurve steeringCurve;
+    // Entrada del jugador
+    public float steerInput, accelInput;
+    public float steerAngle, brakeForceValue;
+    public bool isBraking;
 
+    // Configuración del coche
+    [SerializeField] private float enginePower, brakingPower, maxTurnAngle;
+    [SerializeField] private float topSpeed = 75f;
 
-    // Start is called before the first frame update
-    void Start()
+    // Ruedas (Colliders)
+    [SerializeField] private WheelCollider frontLeftCollider, frontRightCollider;
+    [SerializeField] private WheelCollider rearLeftCollider, rearRightCollider;
+
+    // Ruedas (Transformaciones)
+    [SerializeField] private Transform frontLeftMesh, frontRightMesh;
+    [SerializeField] private Transform rearLeftMesh, rearRightMesh;
+
+    // Centro de masa
+    [SerializeField] private Vector3 massCenterOffset;
+    private Rigidbody rb;
+
+    // Inicialización
+    private void Awake()
     {
-        playerRB = gameObject.GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
+        rb.centerOfMass += massCenterOffset;
     }
 
-    void Update()
+    private void FixedUpdate()
     {
-        speed = playerRB.velocity.magnitude;
-        CheckInput();
-        ApplyMotor();
-        ApplySteering();
-        ApplyBrake();
-        ApplyWheelPositions();
+        ProcessInput();
+        ControlAcceleration();
+        ControlSteering();
+        UpdateWheelMeshes();
     }
 
-    void CheckInput()
+    // Procesar Entrada del Jugador
+    private void ProcessInput()
     {
-        gasInput = Input.GetAxis("Vertical");
+        steerInput = Input.GetAxis("Horizontal");
+        accelInput = Input.GetAxis("Vertical");
+        isBraking = Input.GetKey(KeyCode.Space);
+    }
 
-        steeringInput = Input.GetAxis("Horizontal");
-
-        slipAngle = Vector3.Angle(transform.forward, playerRB.velocity - transform.forward);
-
-        //fixed code to brake even after going on reverse by Andrew Alex 
-        float movingDirection = Vector3.Dot(transform.forward, playerRB.velocity);
-        if (movingDirection < -0.5f && gasInput > 0)
+    // Controlar Aceleración y Frenado
+    private void ControlAcceleration()
+    {
+        if (rb.velocity.magnitude < topSpeed)
         {
-            brakeInput = Mathf.Abs(gasInput);
-        }
-        else if (movingDirection > 0.5f && gasInput < 0)
-        {
-            brakeInput = Mathf.Abs(gasInput);
+            frontLeftCollider.motorTorque = accelInput * enginePower;
+            frontRightCollider.motorTorque = accelInput * enginePower;
         }
         else
         {
-            brakeInput = 0;
+            frontLeftCollider.motorTorque = 0f;
+            frontRightCollider.motorTorque = 0f;
         }
 
-
+        brakeForceValue = isBraking ? brakingPower : 0f;
+        ApplyBrakes();
     }
-    void ApplyBrake()
+
+    // Aplicar Frenado
+    private void ApplyBrakes()
     {
-        colliders.wheelFR.brakeTorque = brakeInput * brakePower * 0.7f;
-        colliders.wheelFL.brakeTorque = brakeInput * brakePower * 0.7f;
-
-        colliders.wheelRR.brakeTorque = brakeInput * brakePower * 0.3f;
-        colliders.wheelRL.brakeTorque = brakeInput * brakePower * 0.3f;
-
-
+        frontRightCollider.brakeTorque = brakeForceValue;
+        frontLeftCollider.brakeTorque = brakeForceValue;
+        rearLeftCollider.brakeTorque = brakeForceValue;
+        rearRightCollider.brakeTorque = brakeForceValue;
     }
-    void ApplyMotor()
+
+    // Controlar Dirección
+    private void ControlSteering()
     {
-
-        colliders.wheelRR.motorTorque = motorPower * gasInput;
-        colliders.wheelRL.motorTorque = motorPower * gasInput;
-
+        steerAngle = maxTurnAngle * steerInput;
+        frontLeftCollider.steerAngle = steerAngle;
+        frontRightCollider.steerAngle = steerAngle;
     }
-    void ApplySteering()
+
+    // Actualizar las Mallas de las Ruedas
+    private void UpdateWheelMeshes()
     {
-
-        float steeringAngle = steeringInput * steeringCurve.Evaluate(speed);
-        if (slipAngle < 120f)
-        {
-            steeringAngle += Vector3.SignedAngle(transform.forward, playerRB.velocity + transform.forward, Vector3.up);
-        }
-        steeringAngle = Mathf.Clamp(steeringAngle, -90f, 90f);
-        colliders.wheelFR.steerAngle = steeringAngle;
-        colliders.wheelFL.steerAngle = steeringAngle;
+        UpdateWheelPose(frontLeftCollider, frontLeftMesh);
+        UpdateWheelPose(frontRightCollider, frontRightMesh);
+        UpdateWheelPose(rearRightCollider, rearRightMesh);
+        UpdateWheelPose(rearLeftCollider, rearLeftMesh);
     }
 
-    void ApplyWheelPositions()
+    // 🟡 Actualizar una Rueda Individual
+    private void UpdateWheelPose(WheelCollider wheelCol, Transform wheelMesh)
     {
-        UpdateWheel(colliders.wheelFR, wheelMeshes.wheelFR);
-        UpdateWheel(colliders.wheelFL, wheelMeshes.wheelFL);
-        UpdateWheel(colliders.wheelRR, wheelMeshes.wheelRR);
-        UpdateWheel(colliders.wheelRL, wheelMeshes.wheelRL);
+        Vector3 pos;
+        Quaternion rot;
+        wheelCol.GetWorldPose(out pos, out rot);
+        wheelMesh.rotation = rot;
+        wheelMesh.position = pos;
     }
-
-    void UpdateWheel(WheelCollider coll, MeshRenderer wheelMesh)
-    {
-        Quaternion quat;
-        Vector3 position;
-        coll.GetWorldPose(out position, out quat);
-        wheelMesh.transform.position = position;
-        wheelMesh.transform.rotation = quat;
-    }
-}
-[System.Serializable]
-public class WheelColliders
-{
-    public WheelCollider wheelFR;
-    public WheelCollider wheelFL;
-    public WheelCollider wheelRR;
-    public WheelCollider wheelRL;
-}
-[System.Serializable]
-public class WheelMeshes
-{
-    public MeshRenderer wheelFR;
-    public MeshRenderer wheelFL;
-    public MeshRenderer wheelRR;
-    public MeshRenderer wheelRL;
 }
