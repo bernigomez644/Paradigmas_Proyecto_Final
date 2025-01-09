@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +7,7 @@ public class PassengerFactory : MonoBehaviour
     public static PassengerFactory Instance { get; private set; }
 
     [SerializeField] private List<GameObject> passengerPrefabs; // Lista de prefabs de pasajeros
+    [SerializeField] private Roads roads; // Referencia al script Roads que contiene los RoadTiles
 
     private void Awake()
     {
@@ -27,9 +27,15 @@ public class PassengerFactory : MonoBehaviour
         int randomIndex = Random.Range(0, passengerPrefabs.Count);
         GameObject passenger = Instantiate(passengerPrefabs[randomIndex], transform);
 
-        // Generar posición inicial y destino
-        Vector3 spawnPosition = GetRandomPosition();
-        Vector3 destination = GetRandomPosition();
+        // Generar posición inicial y destino desde los RoadTiles
+        Vector3 spawnPosition = roads.GetRandomPosition();
+        Vector3 destination = roads.GetRandomPosition();
+
+        // Asegurarse de que el destino sea diferente del origen
+        while (spawnPosition == destination)
+        {
+            destination = roads.GetRandomPosition();
+        }
 
         passenger.transform.position = spawnPosition;
         Passenger passengerScript = passenger.GetComponent<Passenger>();
@@ -38,12 +44,5 @@ public class PassengerFactory : MonoBehaviour
         Debug.Log($"Pasajero creado en posición: {spawnPosition}, con destino: {destination}");
 
         return passenger;
-    }
-
-    private Vector3 GetRandomPosition()
-    {
-        float randomX = Random.Range(-50f, 50f); // Ajusta estos valores según tu mapa
-        float randomZ = Random.Range(-50f, 50f);
-        return new Vector3(randomX, 0, randomZ); // Altura Y = 0
     }
 }
