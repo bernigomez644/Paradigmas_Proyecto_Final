@@ -29,7 +29,6 @@ public class PoliceCar : MonoBehaviour
     private void StartPursuit()
     {
         isPursuing = true; // Activa la persecución
-        Debug.Log("¡El coche ha excedido el límite de velocidad! Iniciando persecución.");
     }
 
     private void OnDestroy()
