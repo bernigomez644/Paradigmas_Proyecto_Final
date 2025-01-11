@@ -41,5 +41,37 @@ public class Roads : MonoBehaviour
         Debug.LogError("No hay RoadTiles disponibles para obtener una posición.");
         return Vector3.zero;
     }
+
+    public List<RoadTile> GetRoadTiles()
+    {
+        return roadTiles;
+    }
+
+    public RoadTile GetRoadTileAtPosition(Vector3 position)
+    {
+        RoadTile closestTile = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (RoadTile roadTile in roadTiles)
+        {
+            // Verificar si el roadTile tiene un collider inicializado
+            if (roadTile.GetMeshCollider() != null && roadTile.GetMeshCollider().bounds.Contains(position))
+            {
+                return roadTile; // Devuelve directamente si la posición está dentro del bounds del collider
+            }
+
+            // Si no está en los bounds, calcular distancia como respaldo
+            float distance = Vector3.Distance(position, roadTile.transform.position);
+            if (distance < closestDistance)
+            {
+                closestTile = roadTile;
+                closestDistance = distance;
+            }
+        }
+
+
+        return closestTile; // Devuelve el más cercano si no se encuentra uno en los bounds
+    }
+
 }
 

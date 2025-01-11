@@ -18,11 +18,25 @@ public class PoliceCar : MonoBehaviour
         CarController.OnExceedSpeedLimit += StartPursuit;
     }
 
+
     private void Update()
     {
         if (isPursuing)
         {
-            agent.destination = player.position; // Persigue al jugador solo si está activo
+            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+            agent.destination = player.position;
+
+            //// Ajusta la velocidad según la distancia
+            //if (distanceToPlayer < 10f) // A menos de 10 unidades, reduce la velocidad
+            //{
+            //    agent.speed = 20f; // Velocidad reducida
+            //}
+            //else
+            //{
+            //    agent.speed = 40f; // Velocidad normal
+            //}
+
+            //agent.destination = player.position; // Persigue al jugador
         }
     }
 
