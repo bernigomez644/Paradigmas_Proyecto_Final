@@ -13,6 +13,8 @@ public class Taxi : MonoBehaviour
     // Evento para notificar cuando se deja al pasajero
     public Action OnPassengerDroppedOff;
 
+    public Action OnTaxiDestroyed;
+
     private void Awake()
     {
         healthbar = GetComponentInChildren<HealthBar>();
@@ -34,7 +36,7 @@ public class Taxi : MonoBehaviour
         }
     }
 
-    public void Heal(float amount)
+    public void HealthUP(float amount)
     {
         health += amount;
         health = Mathf.Min(health, healthmax); // Asegurarse de que no exceda el máximo
@@ -45,15 +47,9 @@ public class Taxi : MonoBehaviour
     public void Die()
     {
         Debug.Log("El taxi ha muerto. Fin del juego.");
-        EndGame();
-        Destroy(gameObject);
-    }
+        OnTaxiDestroyed?.Invoke();
 
-    private void EndGame()
-    {
-        Time.timeScale = 0; // Pausar el tiempo del juego
-        Debug.Log("Game Over. El juego se ha pausado.");
-    }
+}
 
     public void PickUpPassenger()
     {

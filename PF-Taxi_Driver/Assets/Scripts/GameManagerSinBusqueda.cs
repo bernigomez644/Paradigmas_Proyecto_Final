@@ -5,9 +5,12 @@ using UnityEngine;
 
 public class GameManagerSinBusqueda : MonoBehaviour
 {
+    public Action<string> Onchanged;
+    private bool gameEnded = false; // Evitar múltiples finales del juego
     [SerializeField] private PassengerFactory passengerFactory; // Referencia a la fábrica de pasajeros
     [SerializeField] private Roads roads; // Referencia al gestor de RoadTiles
     [SerializeField] private Taxi taxi; // Referencia al Taxi en juego
+
 
     private Passenger currentPassenger; // Referencia al pasajero actual
     private RoadTile passengerTile; // Tile donde está ubicado el pasajero
@@ -17,6 +20,7 @@ public class GameManagerSinBusqueda : MonoBehaviour
     {
         // Suscribirse al evento del taxi
         taxi.OnPassengerDroppedOff += HandlePassengerDroppedOff;
+        taxi.OnTaxiDestroyed += EndGame;
 
         // Crear el primer pasajero al iniciar el juego
         SpawnPassenger();
@@ -113,7 +117,7 @@ public class GameManagerSinBusqueda : MonoBehaviour
 
         if (distance < 3f) // Si el taxi está a menos de 3 unidades
         {
-            Debug.Log("Pasajero recogido.");
+            Onchanged?.Invoke("Pasajero recogido.");
             currentPassenger.gameObject.SetActive(false); // Desactivar al pasajero
             passengerTile.SetLightActive(false); // Apagar la luz del tile del pasajero
             ActivateTileLightForDestination(); // Activar la luz en el tile del destino
@@ -131,9 +135,10 @@ public class GameManagerSinBusqueda : MonoBehaviour
         // Calcular la distancia entre el taxi y el destino del pasajero
         float distanceToDestination = Vector3.Distance(taxi.transform.position, currentPassenger.destination);
 
-        if (distanceToDestination < 3f) // Si el taxi está a menos de 3 unidades del destino
+        if (distanceToDestination < 8f) // Si el taxi está a menos de 3 unidades del destino
         {
             Debug.Log("Pasajero dejado en su destino.");
+            Onchanged?.Invoke("Pasajero entregado, +5 de vida.");
             DeactivateTileLightForDestination(); // Apagar la luz del destino
             taxi.DropOffPassenger(); // Indicar que el taxi ya no lleva pasajero
         }
@@ -145,12 +150,41 @@ public class GameManagerSinBusqueda : MonoBehaviour
         // Generar un nuevo pasajero
         SpawnPassenger();
         ActivateTileLightForPassenger();
+        taxi.HealthUP(5f);
     }
 
     private void OnDestroy()
     {
         // Desuscribirse del evento para evitar problemas
         taxi.OnPassengerDroppedOff -= HandlePassengerDroppedOff;
+    }
+
+    public void EndGame()
+    {
+        if (gameEnded) return;
+
+        gameEnded = true;
+
+        // Mostrar "Game Over" en la UI
+        Onchanged?.Invoke("Game Over");
+
+        // Iniciar la corrutina para salir del "game mode"
+        StartCoroutine(StopGameAfterDelay(2f));
+    }
+
+    private IEnumerator StopGameAfterDelay(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+
+        Time.timeScale = 0; // Detener el tiempo del juego
+        Debug.Log("Game Over. El juego ha terminado.");
+
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false; // Detener el modo de juego en el Editor
+#else
+        Debug.Log("Game has ended, but the application remains open.");
+#endif
     }
 }
 

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Passenger : MonoBehaviour
 {
-    public  Vector3 destination; // Destino del pasajero
+    public Vector3 destination; // Destino del pasajero
     public static event Action OnPassengerReachedDestination; // Evento que notifica al llegar al destino
 
     public bool isWaiting = true; // Indica si el pasajero está esperando

@@ -7,7 +7,7 @@ public class PoliceCar : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Transform player;
-    private bool isPursuing = false; // Indica si el coche de policía está persiguiendo
+    public bool isPursuing = false; // Indica si el coche de policía está persiguiendo
 
     private void Start()
     {
@@ -29,7 +29,7 @@ public class PoliceCar : MonoBehaviour
             //// Ajusta la velocidad según la distancia
             //if (distanceToPlayer < 10f) // A menos de 10 unidades, reduce la velocidad
             //{
-            //    agent.speed = 20f; // Velocidad reducida
+            //  agent.speed = 30f; // Velocidad reducida
             //}
             //else
             //{
