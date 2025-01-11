@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 146874782375118024}
   - component: {fileID: 3005359741925886591}
   - component: {fileID: 3765765029856783916}
+  - component: {fileID: 2592530330384092960}
   m_Layer: 0
   m_Name: RoadBarrier-2 (1)
   m_TagString: Obstacle
@@ -28,8 +29,8 @@ Transform:
   m_GameObject: {fileID: 649391311361921406}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.55, y: 0, z: 176.89633}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -2.3383, y: -0.0023, z: 176.89633}
+  m_LocalScale: {x: 1.8645, y: 2.0475, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -106,3 +107,16 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -7102350196987980496, guid: 2a93dd7ed0832904f95ed1fb1150e1b0, type: 3}
+--- !u!114 &2592530330384092960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 649391311361921406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c28baa3f79392624cb8c40c77b79b218, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lifetime: 4000

@@ -1,18 +1,24 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FenceFactory : ObstacleFactory
 {
-    [SerializeField] private GameObject fencePrefab; // Prefab de la valla
+    [SerializeField] private GameObject fencePrefab; // Asegúrate de que sea un GameObject
 
     public override Obstacle SpawnObstacle(Vector3 position)
     {
-        if (fencePrefab == null)
+        // Instanciar el prefab
+        GameObject instantiatedFence = Instantiate(fencePrefab, position, Quaternion.identity);
+
+        // Obtener el componente del tipo Obstacle
+        Obstacle fence = instantiatedFence.GetComponent<Obstacle>();
+
+        if (fence == null)
         {
-            Debug.LogError("Fence prefab no asignado en el FenceFactory.");
-            return null;
+            Debug.LogError("El prefab asignado no contiene un componente de tipo Obstacle.");
         }
 
-        // Instanciar una valla en la posición indicada
-        return Instantiate(fencePrefab, position, Quaternion.identity);
+        return fence;
     }
 }
