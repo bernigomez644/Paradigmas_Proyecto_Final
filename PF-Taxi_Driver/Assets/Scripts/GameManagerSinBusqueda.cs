@@ -169,7 +169,7 @@ public class GameManagerSinBusqueda : MonoBehaviour
         Onchanged?.Invoke("Game Over");
 
         // Iniciar la corrutina para salir del "game mode"
-        StartCoroutine(StopGameAfterDelay(2f));
+        StartCoroutine(StopGameAfterDelay(3f));
     }
 
     private IEnumerator StopGameAfterDelay(float delay)

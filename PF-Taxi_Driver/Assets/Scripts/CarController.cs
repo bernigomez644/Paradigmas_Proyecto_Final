@@ -1,4 +1,5 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 
 public class CarController : MonoBehaviour
@@ -22,6 +23,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private Transform frontRightMesh;
     [SerializeField] private Transform rearLeftMesh;
     [SerializeField] private Transform rearRightMesh;
+    [SerializeField] TextMeshProUGUI textMeshProUGUI;
 
 
     // Centro de masa
@@ -93,7 +95,8 @@ public class CarController : MonoBehaviour
         float speedKmh = rb.velocity.magnitude * 3.6f; // Convierte m/s a km/h
         if (speedKmh > 40f)
         {
-            OnExceedSpeedLimit?.Invoke(); // Dispara el evento
+            OnExceedSpeedLimit?.Invoke();
+            textMeshProUGUI.text = "TE PERSIGUE LA POLICIA!!!";
         }
     }
 

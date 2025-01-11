@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class PoliceCar : MonoBehaviour
     private NavMeshAgent agent;
     private Transform player;
     public bool isPursuing = false; // Indica si el coche de policía está persiguiendo
+    public event Action<string> OnPursuing;
 
     private void Start()
     {
@@ -26,17 +28,17 @@ public class PoliceCar : MonoBehaviour
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
             agent.destination = player.position;
 
-            //// Ajusta la velocidad según la distancia
-            //if (distanceToPlayer < 10f) // A menos de 10 unidades, reduce la velocidad
-            //{
-            //  agent.speed = 30f; // Velocidad reducida
-            //}
-            //else
-            //{
-            //    agent.speed = 40f; // Velocidad normal
-            //}
+            //Ajusta la velocidad según la distancia
+            if (distanceToPlayer < 10f) // A menos de 10 unidades, reduce la velocidad
+            {
+              agent.speed = 30f; // Velocidad reducida
+            }
+            else
+            {
+                agent.speed = 40f; // Velocidad normal
+            }
 
-            //agent.destination = player.position; // Persigue al jugador
+            agent.destination = player.position; // Persigue al jugador
         }
     }
 
